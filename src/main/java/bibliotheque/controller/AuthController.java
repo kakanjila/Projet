@@ -136,6 +136,7 @@ public void initBinder(WebDataBinder binder) {
             return "redirect:" + contextPath + "/";
         }
         try {
+            
             authService.emprunterLivre(userId, idExemplaire, idTypePret);
             model.addAttribute("success", "Livre emprunté avec succès.");
         } catch (RuntimeException e) {
