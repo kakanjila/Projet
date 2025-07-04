@@ -221,4 +221,55 @@ public class AuthService {
     public List<Pret> getHistoriquePrets() {
         return pretRepository.findAll();
     }
+
+    public void reserverLivre(int idExemplaire, int idAdherent) {
+        Exemplaire exemplaire = exemplaireRepository.findById(idExemplaire)
+            .orElseThrow(() -> new RuntimeException("Exemplaire non trouvé."));
+    
+        Adherent adherent = adherentRepository.findById(idAdherent)
+            .orElseThrow(() -> new RuntimeException("Adhérent non trouvé."));
+    
+        abonnementRepository.findValidByAdherentId(idAdherent)
+            .orElseThrow(() -> new RuntimeException("Abonnement invalide ou expiré."));
+    
+int nbReservations = reservationRepository.countByAdherentIdAndStatutReservation(idAdherent, 1);
+if (nbReservations >= adherent.getTypeAdherent().getNbReservationMax()) {
+    throw new RuntimeException("Vous avez atteint votre quota de réservations.");
+}
+
+if (reservationRepository.existsByExemplaireIdAndAdherentIdAndStatutReservation(
+    idExemplaire, idAdherent, 1)) {
+    throw new RuntimeException("Vous avez déjà réservé cet exemplaire.");
+}
+    
+        if (reservationRepository.existsByExemplaireIdAndAdherentIdAndStatutReservation(
+            idExemplaire, idAdherent, 1)) {
+            throw new RuntimeException("Vous avez déjà réservé cet exemplaire.");
+        }
+    
+        StatusExemplaire status = statusExemplaireRepository.findLatestByExemplaireId(idExemplaire)
+            .orElseThrow(() -> new RuntimeException("Statut exemplaire introuvable."));
+    
+        if (!"Disponible".equalsIgnoreCase(status.getEtat().getLibelle())) {
+            throw new RuntimeException("Cet exemplaire n'est pas disponible.");
+        }
+    
+        Reservation reservation = new Reservation();
+        reservation.setExemplaire(exemplaire);
+        reservation.setAdherent(adherent);
+        reservation.setDateReservation(new Date());
+        
+        StatutReservation statut = new StatutReservation();
+        statut.setId_statut_reservation(1); 
+        reservation.setStatutReservation(statut);
+    
+        reservationRepository.save(reservation);
+    
+        StatusExemplaire newStatus = new StatusExemplaire();
+        newStatus.setExemplaire(exemplaire);
+        newStatus.setDateChangement(new Date());
+        newStatus.setEtat(status.getEtat()); 
+        newStatus.setBibliothecaire(null);
+        statusExemplaireRepository.save(newStatus);
+    }
 }

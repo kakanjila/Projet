@@ -136,6 +136,7 @@ public void initBinder(WebDataBinder binder) {
             return "redirect:" + contextPath + "/";
         }
         try {
+
             authService.emprunterLivre(userId, idExemplaire, idTypePret);
             model.addAttribute("success", "Livre emprunté avec succès.");
         } catch (RuntimeException e) {
@@ -150,25 +151,27 @@ public void initBinder(WebDataBinder binder) {
         return "adherent_accueil";
     }
 
-    // @PostMapping("/adherent/reserver")
-    // public String reserverLivre(@RequestParam("idLivre") int idLivre, HttpSession session, Model model) {
-    //     Integer userId = (Integer) session.getAttribute("userId");
-    //     if (userId == null || !"adherent".equals(session.getAttribute("userRole"))) {
-    //         String contextPath = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
-    //         return "redirect:" + contextPath + "/";
-    //     }
-    //     try {
-    //         authService.reserverLivre(idLivre, userId);
-    //         model.addAttribute("success", "Livre réservé avec succès.");
-    //     } catch (RuntimeException e) {
-    //         model.addAttribute("error", e.getMessage());
-    //     }
-    //     model.addAttribute("userName", session.getAttribute("userName"));
-    //     model.addAttribute("livres", livreRepository.findAll());
-    //     model.addAttribute("exemplaires", exemplaireRepository.findAll());
-    //     return "adherent_accueil";
-    // }
+    @PostMapping("/adherent/reserver")
+    public String reserverLivre(@RequestParam("idLivre") int idLivre, HttpSession session, Model model) {
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null || !"adherent".equals(session.getAttribute("userRole"))) {
+            String contextPath = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+            return "redirect:" + contextPath + "/";
+        }
+        try {
+            authService.reserverLivre(idLivre, userId);
+            model.addAttribute("success", "Livre réservé avec succès.");
+        } catch (RuntimeException e) {
+            model.addAttribute("error", e.getMessage());
+        }
+        model.addAttribute("userName", session.getAttribute("userName"));
+        model.addAttribute("livres", livreRepository.findAll());
+        model.addAttribute("exemplaires", exemplaireRepository.findAll());
+        return "adherent_accueil";
+    }
 
+
+    
     @GetMapping("/bibliothecaire/accueil")
     public String showBibliothecaireAccueil(Model model, HttpSession session) {
         Integer userId = (Integer) session.getAttribute("userId");
