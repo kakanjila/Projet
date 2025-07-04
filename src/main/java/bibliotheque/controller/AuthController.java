@@ -136,7 +136,7 @@ public void initBinder(WebDataBinder binder) {
             return "redirect:" + contextPath + "/";
         }
         try {
-            
+
             authService.emprunterLivre(userId, idExemplaire, idTypePret);
             model.addAttribute("success", "Livre emprunté avec succès.");
         } catch (RuntimeException e) {
@@ -170,6 +170,8 @@ public void initBinder(WebDataBinder binder) {
         return "adherent_accueil";
     }
 
+
+    
     @GetMapping("/bibliothecaire/accueil")
     public String showBibliothecaireAccueil(Model model, HttpSession session) {
         Integer userId = (Integer) session.getAttribute("userId");
